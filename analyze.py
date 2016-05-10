@@ -140,7 +140,8 @@ coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess,coord=coord)
 sess.run(init)
 
-plot = plots.LearningPlot(RUNS*BATCH_SIZE)
+learnPlot = plots.MultiLinePlot(linetitles=['Jtrain','Jcv'], xlimit=RUNS*BATCH_SIZE)
+pPlot = plots.MultiLinePlot(linetitles=["yUp","yDown","yGetCom","yCreateCom","yGetSub","yCreateSub"], ylabel="Probability of Interaction", xlimit=RUNS*BATCH_SIZE)
 
 # Train the model
 processed = 0;
@@ -150,12 +151,12 @@ for i in range(RUNS):
   loss,cv_loss = sess.run([model.loss,model.cv_loss])
 
   processed += BATCH_SIZE
-  plot.addTrainingLoss(loss, processed)
-  plot.addCVLoss(cv_loss, processed)
+  learnPlot.addValues(processed, [loss, cv_loss])
+  pPlot.addValues(processed, p)
 
-  p = np.multiply(100, p) 
-  p = p.astype(int) 
-  print p
+  #p = np.multiply(100, p) 
+  #p = p.astype(int) 
+  #print p
   #print Jtrain, Jtest, Jcv
 
 coord.request_stop()
