@@ -1,11 +1,11 @@
 
 import tensorflow as tf
-BATCH_SIZE=1000
-MIN_AFTER_DEQUEUE=5000
+import numpy as np
+import plots 
 
-articleFiles = tf.train.string_input_producer(["articleTrain.csv", "articleTest.csv", "articleCV.csv"])
-otherFiles = tf.train.string_input_producer(["subarticleTrain.csv", "subarticleTest.csv", "subarticleCV.csv", "commentTrain.csv", "commentTest.csv", "commentCV.csv"])
-
+RUNS=100
+BATCH_SIZE=5000
+MIN_AFTER_DEQUEUE=20000
 
 def parseFile(filename):
   files = tf.train.string_input_producer([filename])
@@ -85,6 +85,8 @@ def getData():
     'cvY': cvYArt
     }
 
+  #TODO Get data for comments and subarticles as well
+  #otherFiles = tf.train.string_input_producer(["subarticleTrain.csv", "subarticleTest.csv", "subarticleCV.csv", "commentTrain.csv", "commentTest.csv", "commentCV.csv"])
   return article
 
 
@@ -107,6 +109,7 @@ class LogisticRegression(object):
       #self.y = tf.placeholder(tf.float32, [None, 6])
       x = linear(x, "regression", self.y.get_shape()[1])
       self.p = tf.nn.sigmoid(x)
+      self.p_avg = tf.reduce_mean(self.p, 0)
       self.loss = loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(x, self.y))
       self.train_op = tf.train.GradientDescentOptimizer(lr).minimize(loss)
 
@@ -137,10 +140,23 @@ coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess,coord=coord)
 sess.run(init)
 
+plot = plots.LearningPlot(RUNS*BATCH_SIZE)
+
 # Train the model
-for i in range(100):
-  Jtrain,Jtest,Jcv,_ = sess.run([model.loss, model.test_loss, model.cv_loss, model.train_op])
-  print Jtrain, Jtest, Jcv
+processed = 0;
+for i in range(RUNS):
+  # Perform a training run
+  p,_ = sess.run([model.p_avg, model.train_op])
+  loss,cv_loss = sess.run([model.loss,model.cv_loss])
+
+  processed += BATCH_SIZE
+  plot.addTrainingLoss(loss, processed)
+  plot.addCVLoss(cv_loss, processed)
+
+  p = np.multiply(100, p) 
+  p = p.astype(int) 
+  print p
+  #print Jtrain, Jtest, Jcv
 
 coord.request_stop()
 coord.join(threads)
