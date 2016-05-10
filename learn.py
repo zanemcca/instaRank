@@ -1,7 +1,7 @@
 
 import tensorflow as tf
-#import numpy as np
 
+# Helpers
 def linear(x, name, size, bias=True):
   w = tf.get_variable(name + "/W", [x.get_shape()[1], size])
   b = tf.get_variable(name + "/b", [1, size],
@@ -15,16 +15,17 @@ def getLinear(x, outputs):
 def sigmoid(x):
   return tf.nn.sigmoid(x)
 
-def sigmoidLossWithLogits(x, y):
-  loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(x, y))
+# Evaluation Metrics
+def sigmoidLossWithLogits(y_, y):
+  loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(y_, y))
   return loss
 
-def LogisticRegression(data,lr=0.1, name="logistic"):
-  def getHypothesis(x, outputs):
-    return linear(x, "regression/" + name, outputs)
+def hammingLoss(y_,y):
+  miss_prediction = tf.logical_xor(tf.cast(tf.round(y), tf.bool), tf.cast(tf.round(y_), tf.bool))
+  return tf.reduce_mean(tf.cast(miss_prediction, tf.float32))
 
-  return GenericRegression(data, sigmoidLossWithLogits, getHypothesis, sigmoid, lr)
 
+# Generic regression class
 class GenericRegression(object):
   def __init__(self, data, getLoss, getHypothesis, getP,lr=0.01):
     with tf.variable_scope("logisticRegression") as scope:
@@ -36,13 +37,13 @@ class GenericRegression(object):
       x = getHypothesis(x, self.y.get_shape()[1])
       self.p = getP(x)
       self.loss = loss = getLoss(x, self.y)
+      self.hamming = hammingLoss(x, self.y)
       #self.loss = loss = sigmoidLossWithLogits(x, self.y))
 
       self.p_avg = tf.reduce_mean(self.p, 0)
       #self.train_op = tf.train.GradientDescentOptimizer(lr).minimize(loss)
       self.train_op = tf.train.AdamOptimizer(lr).minimize(loss)
 
-      # TODO Measure Precision and Recall
       # Cross-Validation data
       xCV = data['cvX']
       yCV = data['cvY']
@@ -50,6 +51,7 @@ class GenericRegression(object):
       scope.reuse_variables()
       xCV = getHypothesis(xCV, yCV.get_shape()[1])
       self.cv_loss = getLoss(xCV, yCV)
+      self.cv_hamming = hammingLoss(xCV, yCV)
 
       # Test data 
       xTest = data['testX']
@@ -61,39 +63,33 @@ class GenericRegression(object):
 
 
 
+# Algorithms
+def LogisticRegression(data,lr=0.1, name="logistic"):
+  def getHypothesis(x, outputs):
+    return linear(x, "regression/" + name, outputs)
 
+  def getP(x):
+    return sigmoid(x)
 
+  def getLoss(x,y):
+    return sigmoidLossWithLogits(x,y)
 
+  return GenericRegression(data, getLoss, getHypothesis, getP, lr)
 
+def MLP(data,layers=2,lr=0.1, name="mlp"):
+  def getHypothesis(x, outputs):
+    for i in range(layers):
+      x =  tf.nn.relu(linear(x, "layer_" + str(i) + "/" + name, outputs))
 
-# TODO  Delete this once we perfect the above approach
-class LLogisticRegression(object):
-  def __init__(self, data, lr=0.01):
-    with tf.variable_scope("logisticRegression") as scope:
-      self.x = x = data['trainX'] 
-      #self.x = x = tf.placeholder(tf.float32, [None, 16])
-      self.y = data['trainY'] 
-      #self.y = tf.placeholder(tf.float32, [None, 6])
-      x = linear(x, "regression", self.y.get_shape()[1])
-      self.p = tf.nn.sigmoid(x)
-      self.p_avg = tf.reduce_mean(self.p, 0)
-      self.loss = loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(x, self.y))
-      #self.train_op = tf.train.GradientDescentOptimizer(lr).minimize(loss)
-      self.train_op = tf.train.AdamOptimizer(lr).minimize(loss)
+    return linear(x, "regression/" + name, outputs)
 
-      # TODO Measure Precision and Recall
-      # Cross-Validation data
-      xCV = data['cvX']
-      yCV = data['cvY']
-      scope.reuse_variables()
-      xCV = linear(xCV, "regression", yCV.get_shape()[1])
-      self.cv_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(xCV, yCV))
-      #self.cv_train_op = tf.train.GradientDescentOptimizer(lr).minimize(self.cv_loss)
+  def getP(x):
+    #return x
+    return sigmoid(x)
 
-      # Test data 
-      xTest = data['testX']
-      yTest = data['testY']
-      scope.reuse_variables()
-      xTest = linear(xTest, "regression", yTest.get_shape()[1])
-      self.test_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(xTest, yTest))
+  def getLoss(x,y):
+    #return hammingLoss(x,y)
+    return sigmoidLossWithLogits(x,y)
+
+  return GenericRegression(data, getLoss, getHypothesis, getP, lr)
 

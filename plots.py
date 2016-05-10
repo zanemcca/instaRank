@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class MultiLinePlot(object):
-  def __init__(self, linetitles=[], xlimit=10000, xlabel="training examples", ylabel="error"):
+  def __init__(self, linetitles=[], ylimit=1, xlimit=10000, xlabel="training examples", ylabel="error"):
     self.linetitles = linetitles
     self.lines = {}
     self.fig = plt.figure()
@@ -15,7 +15,7 @@ class MultiLinePlot(object):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.xlim(0,xlimit)
-    plt.ylim(0,1)
+    plt.ylim(0,ylimit)
 
     class Line(object):
       def __init__(self):
