@@ -25,7 +25,6 @@ def LogisticRegression(data,lr=0.1, name="logistic"):
 
   return GenericRegression(data, sigmoidLossWithLogits, getHypothesis, sigmoid, lr)
 
-
 class GenericRegression(object):
   def __init__(self, data, getLoss, getHypothesis, getP,lr=0.01):
     with tf.variable_scope("logisticRegression") as scope:
@@ -33,7 +32,6 @@ class GenericRegression(object):
       #self.x = x = tf.placeholder(tf.float32, [None, 16])
       self.y = data['trainY'] 
       #self.y = tf.placeholder(tf.float32, [None, 6])
-
 
       x = getHypothesis(x, self.y.get_shape()[1])
       self.p = getP(x)

@@ -15,8 +15,12 @@ model = learn.LogisticRegression(data)
 
 init = tf.initialize_all_variables()
 sess = tf.Session()
+saver = tf.train.Saver()
+
+# All setup must be done before the queue is started
 Data.startQueue(sess=sess)
 sess.run(init)
+
 
 learnPlot = plots.MultiLinePlot(linetitles=['Jtrain','Jcv'], xlimit=RUNS*BATCH_SIZE)
 #pPlot = plots.MultiLinePlot(linetitles=["yUp","yDown","yGetCom","yCreateCom","yGetSub","yCreateSub"], ylabel="Probability of Interaction", xlimit=RUNS*BATCH_SIZE)
@@ -28,6 +32,8 @@ for i in range(RUNS):
   # Perform a training run
   p,_ = sess.run([model.p_avg, model.train_op])
   loss,cv_loss = sess.run([model.loss,model.cv_loss])
+
+  path = saver.save(sess, "/tmp/logisiticRegression.ckpt")
 
   processed += BATCH_SIZE
   learnPlot.addValues(processed, [loss, cv_loss])
