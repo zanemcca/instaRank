@@ -352,13 +352,13 @@ def prepTrainingSet(view):
     if(view['viewableType'] == 'article'):
       x = np.array([[
         view['_id'],
+        item['rating'],
         item['viewCount'],
         item['upVoteCount'],
         item['downVoteCount'],
         item['getCommentsCount'],
         item['createComment'],
         item['notCommentRating'],
-        item['rating'],
         item['PgetComment'],
         item['PcreateComment'],
         item['Pup'],
@@ -373,6 +373,7 @@ def prepTrainingSet(view):
     else:
       x = np.array([[
         view['_id'],
+        item['rating'],
         item['viewCount'],
         item['upVoteCount'],
         item['downVoteCount'],
@@ -434,15 +435,15 @@ def prepTrainingSet(view):
 # Converts the views, clicks and votes into session histories by replaying history and updating the item ratings
 def convertTrainingData():
   data = {
-      'articleTrain.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown','getSubarticlesCount','createSubarticle','notSubarticleRating','PgetSub','PcreateSub']],
-      'articleTest.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown','getSubarticlesCount','createSubarticle','notSubarticleRating','PgetSub','PcreateSub']],
-      'articleCV.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown','getSubarticlesCount','createSubarticle','notSubarticleRating','PgetSub','PcreateSub']],
-      'subarticleTrain.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
-      'subarticleTest.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
-      'subarticleCV.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
-      'commentTrain.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
-      'commentTest.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
-      'commentCV.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']]
+      'articleTrain.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id', 'rating','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown','getSubarticlesCount','createSubarticle','notSubarticleRating','PgetSub','PcreateSub']],
+      'articleTest.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id', 'rating','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown','getSubarticlesCount','createSubarticle','notSubarticleRating','PgetSub','PcreateSub']],
+      'articleCV.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id', 'rating','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown','getSubarticlesCount','createSubarticle','notSubarticleRating','PgetSub','PcreateSub']],
+      'subarticleTrain.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id', 'rating','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
+      'subarticleTest.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id', 'rating','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
+      'subarticleCV.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id', 'rating','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
+      'commentTrain.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id', 'rating','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
+      'commentTest.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id', 'rating','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']],
+      'commentCV.csv': [['yUp','yDown','yGetCom','yCreateCom','yGetSub','yCreateSub','id', 'rating','viewCount','upVoteCount','downVoteCount','getCommentsCount','createComment','notCommentRating','PgetComment','PcreateComment','Pup','Pdown']]
       }
 
   arts = articles[:]
