@@ -154,10 +154,5 @@ for i in range(RUNS):
   learnPlot.addValues(processed, [loss, cv_loss])
   pPlot.addValues(processed, p)
 
-  #p = np.multiply(100, p) 
-  #p = p.astype(int) 
-  #print p
-  #print Jtrain, Jtest, Jcv
-
 coord.request_stop()
 coord.join(threads)
